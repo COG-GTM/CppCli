@@ -28,8 +28,8 @@ jobs:
       - name: Build (Release x64)
         run: msbuild .\CppCliMigration.sln /m /p:Configuration=Release /p:Platform="x64"
       
-      - name: Build (Release Win32)
-        run: msbuild .\CppCliMigration.sln /m /p:Configuration=Release /p:Platform="Win32"
+      - name: Build (Release x86)
+        run: msbuild .\CppCliMigration.sln /m /p:Configuration=Release /p:Platform="x86"
 
       # Smoke test: verify the interop DLL loads and basic methods work
       - name: Run Smoke Test
