@@ -12,7 +12,7 @@ HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 
-CppCliInterop cppCli;                           // Class for interoperating with managed dependency
+CppCliInterop* cppCli = nullptr;                    // Class for interoperating with managed dependency
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -25,10 +25,25 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_ LPWSTR    lpCmdLine,
                      _In_ int       nCmdShow)
 {
+    // Check for smoke test mode
+    if (wcsstr(lpCmdLine, L"/smoketest") != nullptr)
+    {
+        try
+        {
+            CppCliInterop smokeTestCli;
+            smokeTestCli.SetMessage((wchar_t*)L"Smoke test message");
+            return 0; // Success
+        }
+        catch (...)
+        {
+            return 1; // Failure
+        }
+    }
+
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
-    // TODO: Place code here.
+    cppCli = new CppCliInterop();
 
     // Initialize global strings
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -54,6 +69,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             DispatchMessage(&msg);
         }
     }
+
+    delete cppCli;
+    cppCli = nullptr;
 
     return (int) msg.wParam;
 }
@@ -135,8 +153,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             switch (wmId)
             {
             case IDM_ABOUT:
-                cppCli.SetMessage((wchar_t*)L"Hello, from C++\0");
-                cppCli.ShowForm();
+                cppCli->SetMessage((wchar_t*)L"Hello, from C++\0");
+                cppCli->ShowForm();
                 break;
             case IDM_EXIT:
                 DestroyWindow(hWnd);
