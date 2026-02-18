@@ -13,6 +13,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup .NET 6 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '6.0.x'
+
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v2
 
@@ -32,8 +37,14 @@ jobs:
         run: msbuild .\CppCliMigration.sln /m /p:Configuration=Release /p:Platform="x86"
 
       # Smoke test: verify the interop DLL loads and basic methods work
-      - name: Run Smoke Test
+      - name: Run Smoke Test (x64)
         run: |
           cd x64\Release
+          .\NativeApp.exe /smoketest
+        continue-on-error: false
+
+      - name: Run Smoke Test (x86)
+        run: |
+          cd Release
           .\NativeApp.exe /smoketest
         continue-on-error: false
