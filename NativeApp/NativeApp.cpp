@@ -25,6 +25,22 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_ LPWSTR    lpCmdLine,
                      _In_ int       nCmdShow)
 {
+    // Check for smoke test mode
+    if (wcsstr(lpCmdLine, L"/smoketest") != nullptr)
+    {
+        try
+        {
+            CppCliInterop cppCli;
+            cppCli.SetMessage((wchar_t*)L"Smoke test message");
+            // Don't call ShowForm() in CI - just verify DLL loads and method executes
+            return 0; // Success
+        }
+        catch (...)
+        {
+            return 1; // Failure
+        }
+    }
+
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 

@@ -1,0 +1,39 @@
+name: PR Build (Windows)
+
+on:
+  pull_request:
+    branches: ["**"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: NuGet restore
+        run: nuget restore .\CppCliMigration.sln
+
+      - name: MSBuild restore
+        run: msbuild .\CppCliMigration.sln /t:Restore /p:RestorePackagesConfig=true
+
+      - name: Build (Release x64)
+        run: msbuild .\CppCliMigration.sln /m /p:Configuration=Release /p:Platform="x64"
+      
+      - name: Build (Release Win32)
+        run: msbuild .\CppCliMigration.sln /m /p:Configuration=Release /p:Platform="Win32"
+
+      # Smoke test: verify the interop DLL loads and basic methods work
+      - name: Run Smoke Test
+        run: |
+          cd x64\Release
+          .\NativeApp.exe /smoketest
+        continue-on-error: false
